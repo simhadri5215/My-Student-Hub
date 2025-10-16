@@ -6,9 +6,9 @@
 <title>Student Dashboard</title>
 <style>
 * {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-body {background: #eef2f7; display:flex; justify-content:center; padding:20px; min-height:100vh;}
+body {background: #eef2f7; display:flex; justify-content:center; padding:20px; min-height:100vh; flex-direction:column; align-items:center;}
 /* Auth */
-#auth-container { max-width:400px; width:100%; background:#fff; padding:30px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);}
+#auth-container { width:100%; max-width:400px; background:#fff; padding:25px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);}
 #auth-container h2 {text-align:center; margin-bottom:20px; color:#2c3e50;}
 #auth-container form {display:flex; flex-direction:column; gap:15px;}
 #auth-container input, #auth-container button {padding:12px; border-radius:8px; border:1px solid #ccc; font-size:15px;}
@@ -17,13 +17,13 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
 #auth-container p{text-align:center; font-size:14px;}
 #auth-container p span{color:#2575fc; cursor:pointer; font-weight:bold;}
 /* Dashboard */
-.container { max-width:1000px; width:100%; background:#fff; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); position:relative; display:none; }
-#user-name {position:absolute; top:25px; right:150px; font-weight:bold; font-size:18px; color:#2575fc;}
+.container { width:100%; max-width:1000px; background:#fff; padding:25px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); position:relative; display:none; }
+#user-name {position:absolute; top:25px; right:150px; font-weight:bold; font-size:16px; color:#2575fc;}
 #logout-btn {position:absolute; top:20px; right:20px; background:#e74c3c; color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:bold; transition:0.3s;}
 #logout-btn:hover{opacity:0.9;}
 /* Tabs */
-.tabs { display:flex; margin-bottom:25px; border-radius:10px; overflow:hidden; }
-.tabs button { flex:1; padding:14px; cursor:pointer; background:#f4f6fa; border:none; font-weight:bold; transition:0.3s; color:#34495e; font-size:16px; }
+.tabs { display:flex; margin-bottom:20px; border-radius:10px; overflow:hidden; flex-wrap:wrap;}
+.tabs button { flex:1; padding:12px; cursor:pointer; background:#f4f6fa; border:none; font-weight:bold; transition:0.3s; color:#34495e; font-size:14px; }
 .tabs button.active { background:linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.15);}
 .tabs button:hover:not(.active){ background:linear-gradient(90deg,#8e2de2,#4a00e0); color:#fff; }
 /* Sections */
@@ -31,28 +31,30 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
 .section.active { display:block; }
 @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 /* Forms */
-.form-control { margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap; }
-.form-control input, .form-control button, .form-control select, .form-control textarea { padding:12px; border-radius:10px; border:1px solid #ccc; font-size:15px; flex:1; transition:0.3s;}
+.form-control { margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; }
+.form-control input, .form-control button, .form-control select, .form-control textarea { padding:10px; border-radius:8px; border:1px solid #ccc; font-size:14px; flex:1; transition:0.3s;}
 .form-control input:focus, .form-control select:focus, .form-control textarea:focus { border-color:#2575fc; outline:none; }
 .form-control button { flex:0 0 140px; font-weight:bold; background:linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; border:none; cursor:pointer; }
 .form-control button:hover { opacity:0.9; }
 /* Lists */
 .list { list-style:none; padding-left:0; }
-.list li { background:#f4f6fa; padding:15px 20px; margin-bottom:15px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.3s; font-size:15px; }
-.list li.overdue { background:#ffe6e6; border-left:6px solid #e74c3c; }
+.list li { background:#f4f6fa; padding:12px 15px; margin-bottom:12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; box-shadow:0 5px 15px rgba(0,0,0,0.05); font-size:14px; }
+.list li.overdue { background:#ffe6e6; border-left:5px solid #e74c3c; }
 .list li span strong { color:#2575fc; }
-.list button { margin-left:6px; padding:7px 12px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold; transition:0.3s; }
+.list button { margin-left:6px; padding:6px 10px; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:bold; transition:0.3s; }
 .complete-btn { background:#2ecc71;color:#fff; }
 .complete-btn:hover { opacity:0.9; }
 .delete-btn { background:#e74c3c;color:#fff; }
 .delete-btn:hover { opacity:0.9; }
 /* Expense/Notes cards */
 #expense-list li, #notes-list li { background:linear-gradient(135deg,#f5f7fa,#c3cfe2); }
-#total-expense { font-weight:bold; color:#6a11cb; font-size:16px; }
 /* Responsive */
 @media(max-width:700px){ 
+    #user-name{position:static; margin-bottom:15px; text-align:center;}
+    .tabs button{ font-size:13px; padding:10px;}
     .form-control input, .form-control select, .form-control textarea, .form-control button { flex:1 1 100%; }
     .list li span { flex:1 1 100%; margin-bottom:6px; }
+    #expense-summary-container { flex-direction:column; }
 }
 </style>
 </head>
@@ -74,7 +76,7 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
 <div class="container" id="dashboard">
     <div id="user-name"></div>
     <button id="logout-btn">Logout</button>
-    <h1>Student Dashboard</h1>
+    <h1 style="text-align:center; margin-bottom:20px;">Student Dashboard</h1>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="assignments">Assignments</button>
@@ -106,7 +108,7 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
             <button type="submit">Mark</button>
         </form>
         <label for="month-filter">View Month:</label>
-        <input type="month" id="month-filter">
+        <input type="month" id="month-filter" style="margin-bottom:15px;">
         <ul id="attendance-list" class="list"></ul>
     </div>
 
@@ -118,9 +120,9 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
             <button type="submit">Add</button>
         </form>
 
-        <div id="expense-summary-container" style="display:flex; gap:15px; margin-bottom:20px;">
-            <div id="weekly-card" style="flex:1; padding:12px; border-radius:12px; background:linear-gradient(135deg,#f5af19,#f12711); color:#fff; font-weight:bold; text-align:center;">Weekly: ₹0</div>
-            <div id="monthly-card" style="flex:1; padding:12px; border-radius:12px; background:linear-gradient(135deg,#6a11cb,#2575fc); color:#fff; font-weight:bold; text-align:center;">Monthly: ₹0</div>
+        <div id="expense-summary-container" style="display:flex; gap:15px; margin-bottom:15px;">
+            <div id="weekly-card" style="flex:1; padding:10px; border-radius:12px; background:linear-gradient(135deg,#f5af19,#f12711); color:#fff; font-weight:bold; text-align:center;">Weekly: ₹0</div>
+            <div id="monthly-card" style="flex:1; padding:10px; border-radius:12px; background:linear-gradient(135deg,#6a11cb,#2575fc); color:#fff; font-weight:bold; text-align:center;">Monthly: ₹0</div>
         </div>
 
         <ul id="expense-list" class="list"></ul>
@@ -131,7 +133,7 @@ body {background: #eef2f7; display:flex; justify-content:center; padding:20px; m
     <div class="section" id="notes">
         <form id="notes-form" class="form-control">
             <input type="text" id="note-title" placeholder="Title" required>
-            <textarea id="note-content" placeholder="Content" rows="2" required></textarea>
+            <textarea id="note-content" placeholder="Content" rows="3" required></textarea>
             <button type="submit">Add Note</button>
         </form>
         <ul id="notes-list" class="list"></ul>
@@ -163,7 +165,6 @@ authForm.addEventListener('submit', e => {
     const name = nameInput.value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-
     let users = JSON.parse(localStorage.getItem('users')) || [];
 
     if(isLogin){
@@ -380,6 +381,7 @@ notesList.addEventListener('click', e=>{
     notes = notes.filter(n => n.id!==id); li.remove(); saveNotes();
 });
 function saveNotes(){ localStorage.setItem('notes', JSON.stringify(notes)); }
+
 </script>
 </body>
 </html>
