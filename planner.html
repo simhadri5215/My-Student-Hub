@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+body {background: #eef2f7; display:flex; justify-content:center; padding:20px; min-height:100vh;}
+/* Auth */
+#auth-container { max-width:400px; width:100%; background:#fff; padding:30px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);}
+#auth-container h2 {text-align:center; margin-bottom:20px; color:#2c3e50;}
+#auth-container form {display:flex; flex-direction:column; gap:15px;}
+#auth-container input, #auth-container button {padding:12px; border-radius:8px; border:1px solid #ccc; font-size:15px;}
+#auth-container button {background:linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; border:none; font-weight:bold; cursor:pointer; transition:0.3s;}
+#auth-container button:hover{opacity:0.9;}
+#auth-container p{text-align:center; font-size:14px;}
+#auth-container p span{color:#2575fc; cursor:pointer; font-weight:bold;}
+/* Dashboard */
+.container { max-width:1000px; width:100%; background:#fff; padding:30px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); position:relative; display:none; }
+#user-name {position:absolute; top:25px; right:150px; font-weight:bold; font-size:18px; color:#2575fc;}
+#logout-btn {position:absolute; top:20px; right:20px; background:#e74c3c; color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:bold; transition:0.3s;}
+#logout-btn:hover{opacity:0.9;}
+/* Tabs */
+.tabs { display:flex; margin-bottom:25px; border-radius:10px; overflow:hidden; }
+.tabs button { flex:1; padding:14px; cursor:pointer; background:#f4f6fa; border:none; font-weight:bold; transition:0.3s; color:#34495e; font-size:16px; }
+.tabs button.active { background:linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+.tabs button:hover:not(.active){ background:linear-gradient(90deg,#8e2de2,#4a00e0); color:#fff; }
+/* Sections */
+.section { display:none; animation:fadeIn 0.5s ease; }
+.section.active { display:block; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+/* Forms */
+.form-control { margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap; }
+.form-control input, .form-control button, .form-control select, .form-control textarea { padding:12px; border-radius:10px; border:1px solid #ccc; font-size:15px; flex:1; transition:0.3s;}
+.form-control input:focus, .form-control select:focus, .form-control textarea:focus { border-color:#2575fc; outline:none; }
+.form-control button { flex:0 0 140px; font-weight:bold; background:linear-gradient(90deg,#6a11cb,#2575fc); color:#fff; border:none; cursor:pointer; }
+.form-control button:hover { opacity:0.9; }
+/* Lists */
+.list { list-style:none; padding-left:0; }
+.list li { background:#f4f6fa; padding:15px 20px; margin-bottom:15px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.3s; font-size:15px; }
+.list li.overdue { background:#ffe6e6; border-left:6px solid #e74c3c; }
+.list li span strong { color:#2575fc; }
+.list button { margin-left:6px; padding:7px 12px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:bold; transition:0.3s; }
+.complete-btn { background:#2ecc71;color:#fff; }
+.complete-btn:hover { opacity:0.9; }
+.delete-btn { background:#e74c3c;color:#fff; }
+.delete-btn:hover { opacity:0.9; }
+/* Expense/Notes cards */
+#expense-list li, #notes-list li { background:linear-gradient(135deg,#f5f7fa,#c3cfe2); }
+#total-expense { font-weight:bold; color:#6a11cb; font-size:16px; }
+/* Responsive */
+@media(max-width:700px){ 
+    .form-control input, .form-control select, .form-control textarea, .form-control button { flex:1 1 100%; }
+    .list li span { flex:1 1 100%; margin-bottom:6px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Auth -->
+<div id="auth-container">
+    <h2 id="auth-title">Login</h2>
+    <form id="auth-form">
+        <input type="text" id="name" placeholder="Full Name" required style="display:none;">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit" id="auth-button">Login</button>
+    </form>
+    <p id="switch-auth">Don't have an account? <span id="toggle-auth">Register</span></p>
+</div>
+
+<!-- Dashboard -->
+<div class="container" id="dashboard">
+    <div id="user-name"></div>
+    <button id="logout-btn">Logout</button>
+    <h1>Student Dashboard</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="assignments">Assignments</button>
+        <button class="tab-btn" data-tab="attendance">Attendance</button>
+        <button class="tab-btn" data-tab="expenses">Expenses</button>
+        <button class="tab-btn" data-tab="notes">Notes</button>
+    </div>
+
+    <!-- Assignments -->
+    <div class="section active" id="assignments">
+        <form id="assignment-form" class="form-control">
+            <input type="text" id="subject-input" placeholder="Subject" required>
+            <input type="text" id="assignment-input" placeholder="Assignment Name" required>
+            <input type="date" id="due-date-input" required>
+            <button type="submit">Add</button>
+        </form>
+        <ul id="assignment-list" class="list"></ul>
+    </div>
+
+    <!-- Attendance -->
+    <div class="section" id="attendance">
+        <form id="attendance-form" class="form-control">
+            <input type="text" id="student-name-input" readonly>
+            <input type="date" id="attendance-date" required>
+            <select id="attendance-status">
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select>
+            <button type="submit">Mark</button>
+        </form>
+        <label for="month-filter">View Month:</label>
+        <input type="month" id="month-filter">
+        <ul id="attendance-list" class="list"></ul>
+    </div>
+
+    <!-- Expenses -->
+    <div class="section" id="expenses">
+        <form id="expense-form" class="form-control">
+            <input type="text" id="expense-name" placeholder="Expense Name" required>
+            <input type="number" id="expense-amount" placeholder="Amount" required>
+            <button type="submit">Add</button>
+        </form>
+
+        <div id="expense-summary-container" style="display:flex; gap:15px; margin-bottom:20px;">
+            <div id="weekly-card" style="flex:1; padding:12px; border-radius:12px; background:linear-gradient(135deg,#f5af19,#f12711); color:#fff; font-weight:bold; text-align:center;">Weekly: ₹0</div>
+            <div id="monthly-card" style="flex:1; padding:12px; border-radius:12px; background:linear-gradient(135deg,#6a11cb,#2575fc); color:#fff; font-weight:bold; text-align:center;">Monthly: ₹0</div>
+        </div>
+
+        <ul id="expense-list" class="list"></ul>
+        <p>Total Expenses: ₹<span id="total-expense">0</span></p>
+    </div>
+
+    <!-- Notes -->
+    <div class="section" id="notes">
+        <form id="notes-form" class="form-control">
+            <input type="text" id="note-title" placeholder="Title" required>
+            <textarea id="note-content" placeholder="Content" rows="2" required></textarea>
+            <button type="submit">Add Note</button>
+        </form>
+        <ul id="notes-list" class="list"></ul>
+    </div>
+</div>
+
+<script>
+// ---------- Authentication ----------
+const authContainer = document.getElementById('auth-container');
+const dashboard = document.getElementById('dashboard');
+const authForm = document.getElementById('auth-form');
+const toggleAuth = document.getElementById('toggle-auth');
+const authTitle = document.getElementById('auth-title');
+const authButton = document.getElementById('auth-button');
+const nameInput = document.getElementById('name');
+const logoutBtn = document.getElementById('logout-btn');
+let isLogin = true;
+
+toggleAuth.addEventListener('click', () => {
+    isLogin = !isLogin;
+    authTitle.textContent = isLogin ? "Login" : "Register";
+    authButton.textContent = isLogin ? "Login" : "Register";
+    nameInput.style.display = isLogin ? "none" : "block";
+    toggleAuth.textContent = isLogin ? "Register" : "Login";
+});
+
+authForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if(isLogin){
+        const user = users.find(u => u.email===email && u.password===password);
+        if(user){
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            showDashboard(user.name);
+        } else {
+            alert("Invalid email or password");
+        }
+    } else {
+        if(users.find(u=>u.email===email)){ alert("Email already registered"); return; }
+        const user = {name, email, password};
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        showDashboard(user.name);
+    }
+});
+
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('currentUser');
+    location.reload();
+});
+
+function showDashboard(userName){
+    authContainer.style.display = "none";
+    dashboard.style.display = "block";
+    document.getElementById('user-name').textContent = userName;
+    document.getElementById('student-name-input').value = userName;
+}
+
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+if(currentUser) showDashboard(currentUser.name);
+
+// ---------- Tabs ----------
+const tabs = document.querySelectorAll('.tab-btn');
+const sections = document.querySelectorAll('.section');
+tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+        tabs.forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        sections.forEach(s=>s.classList.remove('active'));
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ---------- Assignments ----------
+const assignmentForm = document.getElementById('assignment-form');
+const assignmentList = document.getElementById('assignment-list');
+const subjectInput = document.getElementById('subject-input');
+const assignmentInput = document.getElementById('assignment-input');
+const dueDateInput = document.getElementById('due-date-input');
+let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+assignments.forEach(a=>addAssignmentToDOM(a));
+
+assignmentForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const subject = subjectInput.value.trim(), name = assignmentInput.value.trim(), dueDate = dueDateInput.value;
+    if(!subject||!name||!dueDate) return alert("All fields required");
+    const assignment = {id:Date.now(), subject, name, dueDate, completed:false};
+    assignments.push(assignment); addAssignmentToDOM(assignment); saveAssignments();
+    assignmentForm.reset();
+});
+
+function addAssignmentToDOM(a){
+    const li = document.createElement('li'); 
+    li.dataset.id = a.id; 
+    li.classList.toggle('overdue', isOverdue(a.dueDate,a.completed));
+    li.innerHTML=`<span><strong>${a.subject}</strong> - ${a.name} | Due: ${a.dueDate} | <span class="countdown"></span></span>
+    <div><button class="complete-btn">${a.completed?'Undo':'Done'}</button><button class="delete-btn">Delete</button></div>`;
+    assignmentList.appendChild(li); 
+    updateCountdown(li,a);
+}
+assignmentList.addEventListener('click', e=>{
+    const li = e.target.closest('li'); if(!li) return;
+    const id = Number(li.dataset.id);
+    if(e.target.classList.contains('complete-btn')){
+        assignments = assignments.map(a=>a.id===id ? {...a, completed: !a.completed} : a);
+        li.classList.toggle('overdue', isOverdue(assignments.find(a=>a.id===id).dueDate, assignments.find(a=>a.id===id).completed));
+        e.target.textContent = assignments.find(a=>a.id===id).completed?'Undo':'Done';
+        saveAssignments();
+    } else if(e.target.classList.contains('delete-btn')){
+        assignments = assignments.filter(a=>a.id!==id); li.remove(); saveAssignments();
+    }
+});
+function saveAssignments(){localStorage.setItem('assignments', JSON.stringify(assignments));}
+function updateCountdown(li,a){
+    const countdownEl = li.querySelector('.countdown');
+    function tick(){
+        const now = new Date(), due = new Date(a.dueDate+'T23:59:59'), diff = due-now;
+        if(diff<=0 && !a.completed){ countdownEl.textContent='Overdue!'; li.classList.add('overdue');}
+        else{ const d=Math.floor(diff/86400000), h=Math.floor((diff/3600000)%24), m=Math.floor((diff/60000)%60), s=Math.floor((diff/1000)%60);
+            countdownEl.textContent=`${d}d ${h}h ${m}m ${s}s`; }
+    }
+    tick(); setInterval(tick,1000);
+}
+function isOverdue(due,completed){ return(!completed && new Date(due+'T23:59:59')<new Date()); }
+
+// ---------- Attendance ----------
+const attendanceForm = document.getElementById('attendance-form');
+const attendanceList = document.getElementById('attendance-list');
+const monthFilter = document.getElementById('month-filter');
+let attendanceRecords = JSON.parse(localStorage.getItem('attendance'))||[];
+function renderAttendance(records){
+    attendanceList.innerHTML='';
+    records.forEach(a=>{
+        const li = document.createElement('li');
+        li.innerHTML=`<span>${a.name} | ${a.date} | ${a.status}</span>
+        <button class="delete-btn" data-id="${a.id}">Delete</button>`;
+        attendanceList.appendChild(li);
+    });
+}
+renderAttendance(attendanceRecords);
+attendanceForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = document.getElementById('student-name-input').value;
+    const date = document.getElementById('attendance-date').value;
+    const status = document.getElementById('attendance-status').value;
+    if(!date) return alert("Select date");
+    const record = {id:Date.now(), name, date, status};
+    attendanceRecords.push(record);
+    localStorage.setItem('attendance', JSON.stringify(attendanceRecords));
+    renderAttendance(attendanceRecords);
+});
+attendanceList.addEventListener('click', e=>{
+    if(!e.target.classList.contains('delete-btn')) return;
+    const id = Number(e.target.dataset.id);
+    attendanceRecords = attendanceRecords.filter(r=>r.id!==id);
+    localStorage.setItem('attendance', JSON.stringify(attendanceRecords));
+    renderAttendance(attendanceRecords);
+});
+monthFilter.addEventListener('input', e=>{
+    const month = e.target.value;
+    if(!month){ renderAttendance(attendanceRecords); return; }
+    const filtered = attendanceRecords.filter(r=>r.date.startsWith(month));
+    renderAttendance(filtered);
+});
+
+// ---------- Expenses ----------
+const expenseForm = document.getElementById('expense-form');
+const expenseList = document.getElementById('expense-list');
+const totalExpenseEl = document.getElementById('total-expense');
+const weeklyCard = document.getElementById('weekly-card');
+const monthlyCard = document.getElementById('monthly-card');
+
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+expenses.forEach(e => addExpenseToDOM(e));
+updateTotalExpense();
+
+expenseForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = document.getElementById('expense-name').value.trim();
+    const amount = Number(document.getElementById('expense-amount').value);
+    if(!name || !amount) return alert("Valid expense required");
+
+    const expense = {id:Date.now(), name, amount, date: new Date().toISOString().split('T')[0]};
+    expenses.push(expense); addExpenseToDOM(expense); updateTotalExpense(); saveExpenses();
+    expenseForm.reset();
+});
+
+function addExpenseToDOM(e){
+    const li = document.createElement('li');
+    li.dataset.id = e.id;
+    li.innerHTML = `<span>${e.name} - ₹${e.amount}</span><button class="delete-btn">Delete</button>`;
+    expenseList.appendChild(li);
+}
+
+expenseList.addEventListener('click', e=>{
+    if(!e.target.classList.contains('delete-btn')) return;
+    const li = e.target.closest('li'); const id = Number(li.dataset.id);
+    expenses = expenses.filter(ex => ex.id!==id); li.remove(); updateTotalExpense(); saveExpenses();
+});
+
+function updateTotalExpense(){
+    const now = new Date();
+    totalExpenseEl.textContent = expenses.reduce((sum,e)=>sum+e.amount,0);
+
+    // Weekly
+    const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate()-now.getDay());
+    const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate()+6);
+    const weeklyTotal = expenses.filter(e=>{ const d = new Date(e.date); return d>=startOfWeek && d<=endOfWeek; }).reduce((sum,e)=>sum+e.amount,0);
+    weeklyCard.textContent = `Weekly: ₹${weeklyTotal}`;
+
+    // Monthly
+    const month = now.getMonth(), year = now.getFullYear();
+    const monthlyTotal = expenses.filter(e=>{ const d = new Date(e.date); return d.getMonth()===month && d.getFullYear()===year; }).reduce((sum,e)=>sum+e.amount,0);
+    monthlyCard.textContent = `Monthly: ₹${monthlyTotal}`;
+}
+
+function saveExpenses(){ localStorage.setItem('expenses', JSON.stringify(expenses)); }
+
+// ---------- Notes ----------
+const notesForm = document.getElementById('notes-form');
+const notesList = document.getElementById('notes-list');
+let notes = JSON.parse(localStorage.getItem('notes'))||[];
+notes.forEach(n => addNoteToDOM(n));
+notesForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const title = document.getElementById('note-title').value.trim();
+    const content = document.getElementById('note-content').value.trim();
+    if(!title||!content) return alert("Both fields required");
+    const note = {id:Date.now(), title, content};
+    notes.push(note); addNoteToDOM(note); saveNotes(); notesForm.reset();
+});
+function addNoteToDOM(n){
+    const li = document.createElement('li'); li.dataset.id=n.id;
+    li.innerHTML=`<span><strong>${n.title}</strong> - ${n.content}</span><button class="delete-btn">Delete</button>`;
+    notesList.appendChild(li);
+}
+notesList.addEventListener('click', e=>{
+    if(!e.target.classList.contains('delete-btn')) return;
+    const li = e.target.closest('li'); const id = Number(li.dataset.id);
+    notes = notes.filter(n => n.id!==id); li.remove(); saveNotes();
+});
+function saveNotes(){ localStorage.setItem('notes', JSON.stringify(notes)); }
+</script>
+</body>
+</html>
